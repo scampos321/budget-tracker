@@ -2,10 +2,10 @@ var CACHE_NAME = "my-site-cache-v1";
 const DATA_CACHE_NAME = "data-cache-v1";
 
 var urlsToCache = [
-  "/",
+  "/index.html",
   "/db.js",
   "/index.js",
-  "/manifest.json",
+  "/manifest.webmanifest",
   "/styles.css",
   "/icons/icon-192x192.png",
   "/icons/icon-512x512.png"
@@ -14,11 +14,31 @@ var urlsToCache = [
 self.addEventListener("install", function(event) {
   // Perform install steps
   event.waitUntil(
-    caches.open(CACHE_NAME).then(function(cache) {
-      console.log("Opened cache");
-      return cache.addAll(urlsToCache);
+    caches.open(DATA_CACHE_NAME).then((cache) => cache.add("/api/transaction"))
+  );
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(FILE_TO_CACHE))
+  );
+
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", function(event){
+  event.waitUntil(
+    caches.keys().then(keyList => {
+      return Promise.all(
+        keyList.map(key => {
+          if (key != CACHE_NAME && key !== DATA_CACHE_NAME) {
+            console.log("Removed previous cache data", key);
+            return caches.delete(key)
+          }
+        })
+      );
     })
   );
+
+  self.clients.claim();
+
 });
 
 self.addEventListener("fetch", function(event) {
@@ -46,15 +66,11 @@ self.addEventListener("fetch", function(event) {
   }
 
   event.respondWith(
-    fetch(event.request).catch(function() {
-      return caches.match(event.request).then(function(response) {
-        if (response) {
-          return response;
-        } else if (event.request.headers.get("accept").includes("text/html")) {
-          // return the cached home page for all requests for html pages
-          return caches.match("/");
-        }
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.match(event.request).then(response => {
+        return response || fetch(event.request);
       });
     })
-  );
-});
+      );
+    });
+
