@@ -1,40 +1,22 @@
 let budgetDataB;
 
 let db;
-const request = indexedDB.open("budget", budgetDataB || 21);
 
-request.onupgradeneeded = function (event) {
+const request = indexedDB.open("BudgetDB", budgetVersion || 21);
+
+request.onupgradeneeded = function (e) {
   console.log('Update needed in IndexDb');
-  const { oldVersion } = event;
-  const newVersion = event.newVersion || db.version;
-  db = event.target.result;
+  const { oldVersion } = e;
+  const newVersion = e.newVersion || db.version;
+  console.log(`DB updated from version ${oldVersion} to ${newVersion}`)
+  db = e.target.result;
   if (db.objectStoreNames.length === 0) {
     db.createObjectStore("budgetStore", { autoIncrement: true });
   }
 };
-
-request.onsuccess = function (event) {
-  console.log("success")
-  db = event.target.result;
-
-  // check if app is online before reading from db
-  if (navigator.onLine) {
-    console.log("Backend is now ONLINE!")
-    checkDatabase();
-  }
+request.onerror = function(e) {
+  console.log(`Woops! ${e.target.errorCode}`);
 };
-
-request.onerror = function(event) {
-  console.log("Woops! " + event.target.errorCode);
-};
-
-function saveRecord(record) {
-  console.log("Saved record invoked")
-  const transaction = db.transaction(["budgetStore"], "readwrite");
-  const store = transaction.objectStore("budgetStore");
-
-  store.add(record);
-}
 
 function checkDatabase() {
   let transaction = db.transaction(["currentStore"], "readwrite");
@@ -64,6 +46,29 @@ function checkDatabase() {
     }
   };
 }
+
+request.onsuccess = function (e) {
+  console.log("success")
+  db = e.target.result;
+
+  // check if app is online before reading from db
+  if (navigator.onLine) {
+    console.log("Backend is now ONLINE!")
+    checkDatabase();
+  }
+};
+
+
+
+function saveRecord(record) {
+  console.log("Saved record invoked")
+  const transaction = db.transaction(["budgetStore"], "readwrite");
+  const store = transaction.objectStore("budgetStore");
+
+  store.add(record);
+}
+
+
 
 // listen for app coming back online
 window.addEventListener("online", checkDatabase);
