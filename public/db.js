@@ -1,4 +1,4 @@
-let budgetDataB;
+let budgetVersion;
 
 let db;
 
@@ -11,7 +11,7 @@ request.onupgradeneeded = function (e) {
   console.log(`DB updated from version ${oldVersion} to ${newVersion}`)
   db = e.target.result;
   if (db.objectStoreNames.length === 0) {
-    db.createObjectStore("budgetStore", { autoIncrement: true });
+    db.createObjectStore("BudgetStore", { autoIncrement: true });
   }
 };
 request.onerror = function(e) {
@@ -20,7 +20,7 @@ request.onerror = function(e) {
 
 function checkDatabase() {
   let transaction = db.transaction(["currentStore"], "readwrite");
-  const store = transaction.objectStore("budgetStore");
+  const store = transaction.objectStore("BudgetStore");
   const getAll = store.getAll();
 
   getAll.onsuccess = function() {
@@ -37,8 +37,8 @@ function checkDatabase() {
       .then((res) => {
         // delete records if successful
         if(res.length !== 0) {
-          let transaction = db.transaction(["budgetStore"], "readwrite");
-          const currentStore = transaction.objectStore("budgetStore");
+          let transaction = db.transaction(["BudgetStore"], "readwrite");
+          const currentStore = transaction.objectStore("BudgetStore");
           currentStore.clear();
           console.log('Cleared Store')
         }
@@ -62,8 +62,8 @@ request.onsuccess = function (e) {
 
 function saveRecord(record) {
   console.log("Saved record invoked")
-  const transaction = db.transaction(["budgetStore"], "readwrite");
-  const store = transaction.objectStore("budgetStore");
+  const transaction = db.transaction(["BudgetStore"], "readwrite");
+  const store = transaction.objectStore("BudgetStore");
 
   store.add(record);
 }
