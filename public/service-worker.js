@@ -1,7 +1,7 @@
-var CACHE_NAME = "my-site-cache-v1";
+var CACHE_NAME = "static-cache-v2";
 const DATA_CACHE_NAME = "data-cache-v1";
 
-var urlsToCache = [
+var FILES_TO_CACHE = [
   "/index.html",
   "/db.js",
   "/index.js",
@@ -17,7 +17,7 @@ self.addEventListener("install", function(event) {
     caches.open(DATA_CACHE_NAME).then((cache) => cache.add("/api/transaction"))
   );
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(FILE_TO_CACHE))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(FILES_TO_CACHE))
   );
 
   self.skipWaiting();
@@ -44,6 +44,7 @@ self.addEventListener("activate", function(event){
 self.addEventListener("fetch", function(event) {
   // cache all get requests to /api routes
   if (event.request.url.includes("/api/")) {
+    console.log("[Service Worker] fetch (data)", event.request.url);
     event.respondWith(
       caches.open(DATA_CACHE_NAME).then(cache => {
         return fetch(event.request)
