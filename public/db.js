@@ -1,23 +1,25 @@
-const indexedDB =
-  window.indexedDB ||
-  window.mozIndexedDB ||
-  window.webkitIndexedDB ||
-  window.msIndexedDB ||
-  window.shimIndexedDB;
+let budgetDataB;
 
 let db;
-const request = indexedDB.open("budget", 1);
+const request = indexedDB.open("budget", budgetDataB || 21);
 
-request.onupgradeneeded = ({ target }) => {
-  let db = target.result;
-  db.createObjectStore("pending", { autoIncrement: true });
+request.onupgradeneeded = function (event) {
+  console.log('Update needed in IndexDb');
+  const { oldVersion } = event;
+  const newVersion = event.newVersion || db.version;
+  db = event.target.result;
+  if (db.objectStoreNames.length === 0) {
+    db.createObjectStore("budgetStore", { autoIncrement: true });
+  }
 };
 
-request.onsuccess = ({ target }) => {
-  db = target.result;
+request.onsuccess = function (event) {
+  console.log("success")
+  db = event.target.result;
 
   // check if app is online before reading from db
   if (navigator.onLine) {
+    console.log("Backend is now ONLINE!")
     checkDatabase();
   }
 };
@@ -27,15 +29,16 @@ request.onerror = function(event) {
 };
 
 function saveRecord(record) {
-  const transaction = db.transaction(["pending"], "readwrite");
-  const store = transaction.objectStore("pending");
+  console.log("Saved record invoked")
+  const transaction = db.transaction(["budgetStore"], "readwrite");
+  const store = transaction.objectStore("budgetStore");
 
   store.add(record);
 }
 
 function checkDatabase() {
-  const transaction = db.transaction(["pending"], "readwrite");
-  const store = transaction.objectStore("pending");
+  let transaction = db.transaction(["currentStore"], "readwrite");
+  const store = transaction.objectStore("budgetStore");
   const getAll = store.getAll();
 
   getAll.onsuccess = function() {
@@ -46,17 +49,18 @@ function checkDatabase() {
         headers: {
           Accept: "application/json, text/plain, */*",
           "Content-Type": "application/json"
-        }
+        },
       })
-      .then(response => {        
-        return response.json();
-      })
-      .then(() => {
+      .then((response) => response.json())
+      .then((res) => {
         // delete records if successful
-        const transaction = db.transaction(["pending"], "readwrite");
-        const store = transaction.objectStore("pending");
-        store.clear();
-      });
+        if(res.length !== 0) {
+          let transaction = db.transaction(["budgetStore"], "readwrite");
+          const currentStore = transaction.objectStore("budgetStore");
+          currentStore.clear();
+          console.log('Cleared Store')
+        }
+        });
     }
   };
 }
