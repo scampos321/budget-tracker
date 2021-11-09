@@ -19,7 +19,7 @@ mongoose.connect("mongodb://localhost/budget", {
   useNewUrlParser: true,
   useFindAndModify: false,
   useCreateIndex: true,
-  useUnifiedTopology: false
+  useUnifiedTopology: true
 });
 
 // routes
