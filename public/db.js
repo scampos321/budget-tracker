@@ -19,7 +19,7 @@ request.onerror = function(e) {
 };
 
 function checkDatabase() {
-  let transaction = db.transaction(["currentStore"], "readwrite");
+  let transaction = db.transaction(["BudgetStore"], "readwrite");
   const store = transaction.objectStore("BudgetStore");
   const getAll = store.getAll();
 
