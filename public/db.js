@@ -37,7 +37,7 @@ function checkDatabase() {
       .then((res) => {
         // delete records if successful
         if(res.length !== 0) {
-          let transaction = db.transaction(["BudgetStore"], "readwrite");
+          let transaction = db.transaction(["currentStore"], "readwrite");
           const currentStore = transaction.objectStore("BudgetStore");
           currentStore.clear();
           console.log('Cleared Store')
