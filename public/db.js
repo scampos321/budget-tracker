@@ -19,7 +19,7 @@ request.onerror = function(e) {
 };
 
 function checkDatabase() {
-  let transaction = db.transaction(["BudgetStore"], "readwrite");
+  let transaction = db.transaction(["currentStore"], "readwrite");
   const store = transaction.objectStore("BudgetStore");
   const getAll = store.getAll();
 
@@ -37,7 +37,7 @@ function checkDatabase() {
       .then((res) => {
         // delete records if successful
         if(res.length !== 0) {
-          let transaction = db.transaction(["currentStore"], "readwrite");
+          let transaction = db.transaction(["BudgetStore"], "readwrite");
           const currentStore = transaction.objectStore("BudgetStore");
           currentStore.clear();
           console.log('Cleared Store')
