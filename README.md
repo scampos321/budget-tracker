@@ -20,7 +20,7 @@
 
 
 # Usage 
-* Use my heroku application [Heroku Deployment](https://powerful-headland-74056.herokuapp.com/)
+* Use my heroku application [Heroku Deployment](https://agile-dusk-09685.herokuapp.com/)
 To run locally
 `npm start`
 
